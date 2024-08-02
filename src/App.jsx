@@ -1,35 +1,72 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+import { TURNS } from "./logic/constants";
+import { Squares } from "./components/Squares";
+import { checkGameEnd, checkWinner } from "./logic/checkGameStatus";
+import { WinnerBoard } from "./components/WinnerBoard";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [board, setBoard] = useState(Array(42).fill(null));
+  const [turn, setTrun] = useState(TURNS.first);
+  const [winner, setWinner] = useState(null);
+
+  const handleClick = (index) => {
+    if (board[index] != null) return;
+
+    if (index + 7 < board.length) {
+      if (board[index + 7] == null) return;
+    }
+
+    const newBoard = [...board];
+    newBoard[index] = turn;
+    setBoard(newBoard);
+
+    const newTurn = turn == TURNS.first ? TURNS.second : TURNS.first;
+    setTrun(newTurn);
+
+    const newWinner = checkWinner(newBoard);
+
+    if (newWinner) {
+      setWinner(newBoard[index]);
+    } else if (checkGameEnd(newBoard)) {
+      setWinner(false);
+    }
+  };
+
+  const resetGame = () => {
+    setBoard(Array(42).fill(null));
+    setTrun(TURNS.first);
+    setWinner(null);
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="board">
+      <h1>4 En Raya</h1>
+      <div className="d-flex">
+        <div className="game">
+          {board.map((element, index) => {
+            return (
+              <Squares key={index} checkClick={handleClick} index={index}>
+                {element}
+              </Squares>
+            );
+          })}
+        </div>
+
+        <section className="turn">
+          <Squares isActive={TURNS.first == turn}>{TURNS.first}</Squares>
+          <Squares isActive={TURNS.second == turn}>{TURNS.second}</Squares>
+          <button
+            onClick={resetGame}
+            style={{ marginTop: "5px", marginBottom: "5px" }}
+          >
+            Reset
+          </button>
+        </section>
+
+        <WinnerBoard winner={winner} restartGame={resetGame}/>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    </div>
+  );
 }
 
-export default App
+export default App;
