@@ -3,6 +3,7 @@ import { TURNS } from "./logic/constants";
 import { Squares } from "./components/Squares";
 import { checkGameEnd, checkWinner } from "./logic/checkGameStatus";
 import { WinnerBoard } from "./components/WinnerBoard";
+import confetti from "canvas-confetti"
 
 function App() {
   const [board, setBoard] = useState(Array(42).fill(null));
@@ -26,6 +27,7 @@ function App() {
     const newWinner = checkWinner(newBoard);
 
     if (newWinner) {
+      confetti()
       setWinner(newBoard[index]);
     } else if (checkGameEnd(newBoard)) {
       setWinner(false);
